@@ -1,4 +1,4 @@
-const validator = require("../middleware/validator");
+const {validateGenre} = require("../middleware/validator");
 const {Genre} = require("../models/genres");
 const express = require("express");
 const router = express.Router();
@@ -14,7 +14,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const {error} = validator.valiateGenre(req.body);
+    const {error} = validateGenre(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     let genre = new Genre({name: req.body.name});
     try{res.send(await genre.save());}
@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-    const {error} = validator.valiateGenre(req.body);
+    const {error} = validateGenre(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     try {res.send(await Genre.findByIdAndUpdate(req.params.id,{name: req.body.name},{new: true}));}
     catch(err) {res.status(400).send(err)}

@@ -1,7 +1,7 @@
 const express = require("express");
 const Movies = require("../models/movies");
 const {Genre} = require("../models/genres");
-const validator = require("../middleware/validator");
+const {validateMovie} = require("../middleware/validator");
 const router = express.Router();
 
 // Routes
@@ -15,7 +15,7 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const {error} = validator.validateMovie(req.body);
+    const {error} = validateMovie(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     const genre = await Genre.findById(req.body.genreId);
     if (!genre) return res.status(400).send("Invalid genre sent");
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
     if(!(await Movies.findById(req.params.id))) return res.status(404).send(`A customer with ID: ${req.params.id} was not found`);
-    const {error} = validator.validateMovie(req.body);
+    const {error} = validateMovie(req.body);
     if(error) res.status(400).send(error.message);
     try{res.send(await Movies.findOneAndUpdate({_id: req.params.id},req.body,{new:true}))}
     catch(err) {res.status(400).send(err.message)}
