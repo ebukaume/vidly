@@ -22,6 +22,18 @@ const rentalSchema = {
     movieId: Joi.objectId().required()
 }
 
+const newUserSchema = {
+    name: Joi.string().min(2).max(255).required(),
+    email: Joi.string().min(6).max(255).required().email(),
+    password: Joi.string().min(8).max(255).required()
+}
+
+const authUserSchema = {
+    email: Joi.string().min(6).max(255).required().email(),
+    password: Joi.string().min(8).max(255).required()
+}
+
+
 function validateGenre(genre){
     return Joi.validate(genre,genreSchema);
 }
@@ -38,11 +50,20 @@ function validateRental(rental){
     return Joi.validate(rental,rentalSchema);
 }
 
+function validateUserNew(user){
+    return Joi.validate(user,newUserSchema);
+}
+
+function validateUserAuth(user){
+    return Joi.validate(user,authUserSchema);
+}
 
 module.exports = {
     validateGenre, 
     validateCustomer, 
     validateMovie, 
-    validateRental
+    validateRental,
+    validateUserNew,
+    validateUserAuth
 };
 

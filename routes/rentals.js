@@ -5,12 +5,14 @@ const Customer = require("../models/customers");
 const mongoose = require("mongoose");
 const Fawn = require("fawn");
 const {validateRental} = require("../middleware/validator");
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 const router = express.Router();
 
 //Initialize Fawn
 Fawn.init(mongoose);
 
-// Routes
+
 router.get("/", async (req, res) => {
     res.send(await Rental.find().sort("-dateOut").select("-__v"));
 });
@@ -20,7 +22,7 @@ router.get("/:id", async (req, res) => {
     catch(err){res.status(404).send(`Customer with the ID: ${req.params.id} was not found!`)}
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
     const {error} = validateRental(req.body);
     if (error) return res.status(400).send(error.details[0].message);
     const customer = await Customer.findById(req.body.customerId);
@@ -51,11 +53,11 @@ router.post("/", async (req, res) => {
             .run();
         res.send(rental);
     }
-    //To do; log exception
+    //TODO: log exception
     catch (ex){res.status(500).send("Sorry, something went wrong!")}
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [auth, admin], async (req, res) => {
     try{res.send(await Rental.findByIdAndDelete(req.params.id))}
     catch(err){res.status(400).send(err.message)}
 });
