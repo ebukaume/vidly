@@ -1,5 +1,5 @@
 const Joi = require("joi");
-
+Joi.objectId = require("joi-objectid")(Joi);
 const genreSchema = {
     name: Joi.string().min(5).max(50).required()
 };
@@ -12,14 +12,14 @@ const customerSchema = {
 
 const movieSchema = {
     title: Joi.string().min(1).max(50).required(),
-    genreId: Joi.string().required(),
+    genreId: Joi.objectId().required(),
     numberInStock: Joi.number().min(0),
     dailyRentalRate: Joi.number().min(0)
 };
 
 const rentalSchema = {
-    customerId: Joi.string().required(),
-    movieId: Joi.string().required()
+    customerId: Joi.objectId().required(),
+    movieId: Joi.objectId().required()
 }
 
 function validateGenre(genre){

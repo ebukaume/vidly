@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try{res.send(await Customer.findById(req.params.id).select("-__v"))}
-    catch(err){res.status(404).send(`Customer with the ID: ${req.params.id} was not found!`)}
+    catch(err){res.status(400).send(`Customer with the ID: ${req.params.id} was not found!`)}
 });
 
 router.post("/", async (req, res) => {
