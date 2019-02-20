@@ -33,6 +33,9 @@ const authUserSchema = {
     password: Joi.string().min(8).max(255).required()
 }
 
+const objectIdSchema = {
+    id: Joi.objectId().required()
+}
 
 function validateGenre(genre){
     return Joi.validate(genre,genreSchema);
@@ -58,12 +61,16 @@ function validateUserAuth(user){
     return Joi.validate(user,authUserSchema);
 }
 
+function validateObjectId(objectId){
+    return Joi.validate(objectId, objectIdSchema);
+}
 module.exports = {
     validateGenre, 
     validateCustomer, 
     validateMovie, 
     validateRental,
     validateUserNew,
-    validateUserAuth
+    validateUserAuth,
+    validateObjectId
 };
 

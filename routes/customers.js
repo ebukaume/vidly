@@ -1,6 +1,6 @@
 const express = require("express");
 const Customer = require("../models/customers");
-const {validateCustomer} = require("../middleware/validator");
+const {validateCustomer, validateObjectId} = require("../middleware/validator");
 const router = express.Router();
 
 // Routes
@@ -9,29 +9,31 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    try{res.send(await Customer.findById(req.params.id).select("-__v"))}
-    catch(err){res.status(400).send(`Customer with the ID: ${req.params.id} was not found!`)}
+    const {error} = validateObjectId({id: req.params.id});
+    if(error) return res.status(400).send("Invalid ID");
+    res.send(await Customer.findById(req.params.id).select("-__v"));
 });
 
 router.post("/", async (req, res) => {
     const {error} = validateCustomer(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
+    if(error) return res.status(400).send(error.details[0].message);
     let customer = new Customer(req.body);
-    try{res.send(await customer.save())}
-    catch (err){res.status(400).send(err.message)}
+    res.send(await customer.save());
 });
 
 router.put("/:id", async (req, res) => {
+    const {err} = validateObjectId({id: req.params.id});
+    if (err) return res.status(400).send("Invalid ID");
     if(!(await Customer.findById(req.params.id))) return res.status(404).send(`A customer with ID: ${req.params.id} was not found`);
     const {error} = validateCustomer(req.body);
     if(error) res.status(400).send(error.message);
-    try{res.send(await Customer.findOneAndUpdate({_id: req.params.id},req.body,{new:true}))}
-    catch(err) {res.status(400).send(err.message)}
+    res.send(await Customer.findOneAndUpdate({_id: req.params.id},req.body,{new:true}));
 });
 
 router.delete("/:id", async (req, res) => {
-    try{res.send(await Customer.findByIdAndDelete(req.params.id))}
-    catch(err){res.status(400).send(err.message)}
+    const {error} = validateObjectId({id: req.params.id});
+    if (error) return res.status(400).send("Invalid ID");
+    res.send(await Customer.findByIdAndDelete(req.params.id));
 });
 
 module.exports = router;

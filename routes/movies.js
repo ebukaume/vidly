@@ -1,7 +1,7 @@
 const express = require("express");
 const Movies = require("../models/movies");
 const {Genre} = require("../models/genres");
-const {validateMovie} = require("../middleware/validator");
+const {validateMovie, validateObjectId} = require("../middleware/validator");
 const auth = require("../middleware/auth");
 const router = express.Router();
 
@@ -11,8 +11,9 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-    try{res.send(await Movies.findById(req.params.id).select("-__v"))}
-    catch(err){res.status(404).send(`Customer with the ID: ${req.params.id} was not found!`)}
+    const {error} = validateObjectId({id: req.params.id});
+    if (error) return res.status(400).send("Invalid ID");
+    res.send(await Movies.findById(req.params.id).select("-__v"));
 });
 
 router.post("/", auth, async (req, res) => {
@@ -29,21 +30,22 @@ router.post("/", auth, async (req, res) => {
         numberInStock: req.body.numberInStock,
         dailyRentalRate: req.body.dailyRentalRate
     });
-    try{res.send(await movie.save())}
-    catch (err){res.status(400).send(err.message)}
+    res.send(await movie.save());
 });
 
 router.put("/:id", auth, async (req, res) => {
-    if(!(await Movies.findById(req.params.id))) return res.status(404).send(`A customer with ID: ${req.params.id} was not found`);
+    const {err} = validateObjectId({id: req.params.id});
+    if (err) return res.status(400).send("Invalid ID");
     const {error} = validateMovie(req.body);
     if(error) res.status(400).send(error.message);
-    try{res.send(await Movies.findOneAndUpdate({_id: req.params.id},req.body,{new:true}))}
-    catch(err) {res.status(400).send(err.message)}
+    if(!(await Movies.findById(req.params.id))) return res.status(404).send(`Movie with ID: ${req.params.id} was not found`);
+    res.send(await Movies.findOneAndUpdate({_id: req.params.id},req.body,{new:true}));
 });
 
 router.delete("/:id", auth, async (req, res) => {
-    try{res.send(await Movies.findByIdAndDelete(req.params.id))}
-    catch(err){res.status(400).send(err.message)}
+    const {error} = validateObjectId({id: req.params.id});
+    if (error) return res.status(400).send("Invalid ID");
+    res.send(await Movies.findByIdAndDelete(req.params.id));
 });
 
 module.exports = router;
