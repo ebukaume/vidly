@@ -2,34 +2,38 @@ const express = require("express");
 const Rental = require("../models/rentals");
 const Movie = require("../models/movies");
 const Customer = require("../models/customers");
-const mongoose = require("mongoose");
-const Fawn = require("fawn");
-const {validateRental, validateObjectId} = require("../middleware/validator");
+const {validateRental, validateObjectId} = require("../helpers/validator");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
+const Fawn = require("../helpers/fawn");
 const router = express.Router();
-
-//Initialize Fawn
-Fawn.init(mongoose);
 
 
 router.get("/", async (req, res) => {
-    res.send(await Rental.find().sort("-dateOut").select("-__v"));
+    const rentals = await Rental.find().sort("-dateOut").select("-__v");
+    
+    res.send(rentals);
 });
 
 router.get("/:id", async (req, res) => {
     const {error} = validateObjectId({id: req.params.id});
     if (error) return res.status(400).send("Invalid ID");
-    res.send(await Rental.findById(req.params.id).select("-__v"));
+    
+    const rental = await Rental.findById(req.params.id).select("-__v");
+    
+    res.send(rental);
 });
 
 router.post("/", auth, async (req, res) => {
     const {error} = validateRental(req.body);
     if (error) return res.status(400).send(error.details[0].message);
+    
     const customer = await Customer.findById(req.body.customerId);
     if (!customer) return res.status(400).send("Invalid customer");
+    
     const movie = await Movie.findById(req.body.movieId);
     if (!movie) return res.status(400).send("Invalid movie");
+    
     if (movie.numberInStock === 0) return res.status(400).send("Movie is out of stock");
     let rental = new Rental({
         customer:{
@@ -45,17 +49,21 @@ router.post("/", auth, async (req, res) => {
         }
     });
     //Transaction-like option {2 phase commit} [Removed try-catch block]
-    new Fawn.Task()
+    Fawn
         .save("rentals", rental)
         .update("movies", {_id: movie._id},{$inc: {numberInStock: -1}})
         .run();
+    
     res.send(rental);
 });
 
 router.delete("/:id", [auth, admin], async (req, res) => {
     const {error} = validateObjectId({id: req.params.id});
     if (error) return res.status(400).send("Invalid ID");
-    res.send(await Rental.findByIdAndDelete(req.params.id));
+    
+    const rental = await Rental.findByIdAndDelete(req.params.id);
+    
+    res.send(rental);
 });
 
 module.exports = router;

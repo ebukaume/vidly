@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "An API for a video rental app",
   "main": "index.js",
+  "jest": {
+  "testEnvironment": "node"
+	},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watchAll --verbose --coverage"
   },
   "keywords": [
     "video",
@@ -23,7 +26,12 @@
     "joi-objectid": "^2.0.0",
     "jsonwebtoken": "^8.5.0",
     "lodash": "^4.17.11",
+    "moment": "^2.24.0",
     "mongoose": "^5.4.14",
     "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "jest": "^24.1.0",
+    "supertest": "^3.4.2"
   }
 }

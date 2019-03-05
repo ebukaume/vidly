@@ -1,5 +1,5 @@
 const express = require("express");
-const {validateGenre, validateObjectId} = require("../middleware/validator");
+const {validateGenre, validateObjectId} = require("../helpers/validator");
 const {Genre} = require("../models/genres");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
@@ -13,28 +13,41 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     const {error} = validateObjectId({id: req.params.id});
     if (error) return res.status(400).send("Invalid ID");
-    res.send(await Genre.findById(req.params.id).select("-__v"));
+    
+    const genre = await Genre.findById(req.params.id).select("-__v");
+    if (!genre) return res.status(404).send("Genre with the given ID was not found");
+    
+    res.send(genre);
 });
 
 router.post("/", auth, async (req, res) => {
     const {error} = validateGenre(req.body);
     if (error) return res.status(400).send(error.details[0].message);
+    
     let genre = new Genre({name: req.body.name});
-    res.send(await genre.save());
+    genre = await genre.save();
+
+    res.send(genre);
 });
 
 router.put("/:id", [auth, admin], async (req, res) => {
-    const {err} = validateObjectId({id: req.params.id});
-    if (err) return res.status(400).send("Invalid ID");
+    const valRes = validateObjectId({id: req.params.id});
+    if (valRes.error) return res.status(402).send("Invalid ID");
+    
     const {error} = validateGenre(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-    res.send(await Genre.findByIdAndUpdate(req.params.id,{name: req.body.name},{new: true}));
+    
+    const genre = await Genre.findOneAndUpdate({_id:req.params.id},{name: req.body.name},{new: true});
+
+    res.send(genre);
 });
 
 router.delete("/:id", [auth, admin], async (req, res) => {
     const {error} = validateObjectId({id: req.params.id});
     if (error) return res.status(400).send("Invalid ID");
-    res.send(await Genre.findByIdAndDelete(req.params.id));
+    
+    const genre = await Genre.findByIdAndDelete(req.params.id)
+    res.send(genre);
 });
 
 

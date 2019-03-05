@@ -1,5 +1,6 @@
 const Joi = require("joi");
 Joi.objectId = require("joi-objectid")(Joi);
+
 const genreSchema = {
     name: Joi.string().min(5).max(50).required()
 };
@@ -34,7 +35,7 @@ const authUserSchema = {
 }
 
 const objectIdSchema = {
-    id: Joi.objectId().required()
+    id: Joi.objectId().min(24).required()
 }
 
 function validateGenre(genre){
@@ -64,6 +65,7 @@ function validateUserAuth(user){
 function validateObjectId(objectId){
     return Joi.validate(objectId, objectIdSchema);
 }
+
 module.exports = {
     validateGenre, 
     validateCustomer, 
