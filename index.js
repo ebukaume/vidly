@@ -9,6 +9,10 @@ require("./startup/db")();
 
 const port = process.env.PORT || 3000;
 
-const server = app.listen(port, () => {winston.info(`Vidly server started on port ${port}`)});
 
-module.exports = server;
+// Comment this section when testing
+app.listen(port, () => {winston.info(`Vidly server started on port ${port}`)});
+
+
+// Uncomment this section when testing
+// module.exports = app.listen(port, () => {winston.info(`Vidly server started on port ${port}`)});
