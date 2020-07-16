@@ -25,7 +25,7 @@
     "joi": "^14.3.1",
     "joi-objectid": "^2.0.0",
     "jsonwebtoken": "^8.5.0",
-    "lodash": "^4.17.13",
+    "lodash": "^4.17.19",
     "moment": "^2.24.0",
     "mongoose": "^5.4.14",
     "winston": "^3.2.1"
